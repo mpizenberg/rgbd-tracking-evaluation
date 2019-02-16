@@ -126,3 +126,15 @@ compared_pose_pairs 790 pairs
 absolute_translational_error.rmse 0.046804 m
 ...
 ```
+
+## License
+
+This repository directly depends on code with different licenses:
+
+- OpenCV is under BSD-3-Clause
+- Eigen3 is under MPL-2.0
+- Boost is under the Boost license
+- DVO is under GPL-3.0 or later
+- Fovis is under GPL-2.0 or later
+
+As a consequence, the code in this repository is distributed under GPL-3.0 or later.
