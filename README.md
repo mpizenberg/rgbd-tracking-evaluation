@@ -27,14 +27,18 @@ The open-source algorithms available for testing here are:
     Richard A. Newcombe, Andrew Fitzgibbon, at al, SIGGRAPH, 2011.
   - one mixed approach ([`RgbdICP`][ocv-rgbd-icp]) minimizing
     the sum of both energy functions.
-- The [fovis][fovis] visual odometry library.
+- The [fovis][fovis] visual odometry library, based on the paper
+  "Visual Odometry and Mapping for Autonomous Flight Using an RGB-D Camera",
+  Albert S. Huang, Abraham Bachrach, Peter Henry, Michael Krainin,
+  Daniel Maturana, Dieter Fox, and Nicholas Roy.
+  Int. Symposium on Robotics Research (ISRR), Flagstaff, Arizona, USA, Aug. 2011
 - Dense Visual Odometry ([DVO][dvo]), based on the paper
   "Robust Odometry Estimation for RGB-D Cameras", C. Kerl, J. Sturm and D. Cremers,
   In International Conference on Robotics and Automation (ICRA), 2013.
-  TODO: strip ROS requirements of DSO.
+  TODO: strip ROS requirements of DVO.
 
 [ocv-odometry]: https://docs.opencv.org/4.0.1/df/ddc/classcv_1_1rgbd_1_1Odometry.html
-[ovc-rgbd]: https://docs.opencv.org/4.0.1/d0/d60/classcv_1_1rgbd_1_1RgbdOdometry.html
+[ocv-rgbd]: https://docs.opencv.org/4.0.1/d0/d60/classcv_1_1rgbd_1_1RgbdOdometry.html
 [ocv-icp]: https://docs.opencv.org/4.0.1/d7/d83/classcv_1_1rgbd_1_1ICPOdometry.html
 [ocv-rgbd-icp]: https://docs.opencv.org/4.0.1/d2/d0f/classcv_1_1rgbd_1_1RgbdICPOdometry.html
 [fovis]: https://github.com/fovis/fovis
@@ -45,9 +49,9 @@ The open-source algorithms available for testing here are:
 Each algorithm have a different set of requirements.
 These have been tested under the Arch linux distribution,
 kernel 4.19.17-1-lts or more recent.
-To make everything compile, it required, as direct dependencies:
+To make everything compile, it required:
 
-- [OpenCV][open-cv]. OpenCV-Contrib also required. Tested with version 4.0.1.
+- [OpenCV][open-cv]. Contrib also required. Tested with version 4.0.1.
 - [Ceres Solver][ceres-solver]. Tested with version 1.14.0.
 - [Eigen3][eigen3]. Tested with version 3.3.7.
 - [Boost][boost]. Tested with version 1.69.0.
