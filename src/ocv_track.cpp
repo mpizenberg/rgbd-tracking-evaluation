@@ -9,10 +9,48 @@ namespace rgbd = cv::rgbd;
 
 // This file is automatically formatted with clang-format.
 
-const std::string usage = "Usage: ./Tum [Rgbd|ICP|RgbdICP] associations_file";
+const std::string usage =
+    "Usage: ./Tum [Rgbd|ICP|RgbdICP] [fr1|fr2|fr3|icl] associations_file";
+
+// Generate camera intrinsics parameters.
+// BEWARE that fr1 and fr2 sequences are not undistorted
+// so the performance on these might be worse.
+cv::Mat create_camera(std::string camera_id) {
+  cv::Mat camera_intrinsics = cv::Mat::eye(3, 3, CV_32FC1);
+
+  if (camera_id == "fr1") {
+    camera_intrinsics.at<float>(0, 0) = 517.306408; // fx
+    camera_intrinsics.at<float>(1, 1) = 516.469215; // fy
+    camera_intrinsics.at<float>(0, 2) = 318.643040; // cx
+    camera_intrinsics.at<float>(1, 2) = 255.313989; // cy
+  } else if (camera_id == "fr2") {
+    camera_intrinsics.at<float>(0, 0) = 520.908620; // fx
+    camera_intrinsics.at<float>(1, 1) = 521.007327; // fy
+    camera_intrinsics.at<float>(0, 2) = 325.141442; // cx
+    camera_intrinsics.at<float>(1, 2) = 249.701764; // cy
+  } else if (camera_id == "fr3") {
+    // Color images of Freiburg 3 sequences have already been undistorted.
+    camera_intrinsics.at<float>(0, 0) = 535.433105; // fx
+    camera_intrinsics.at<float>(1, 1) = 539.212524; // fy
+    camera_intrinsics.at<float>(0, 2) = 320.106653; // cx
+    camera_intrinsics.at<float>(1, 2) = 247.632132; // cy
+  } else if (camera_id == "icl") {
+    camera_intrinsics.at<float>(0, 0) = 481.20; // fx
+    camera_intrinsics.at<float>(1, 1) = -480.0; // fy
+    camera_intrinsics.at<float>(0, 2) = 319.50; // cx
+    camera_intrinsics.at<float>(1, 2) = 239.50; // cy
+  } else {
+    std::cerr << "Unknown camera id: " << camera_id << std::endl;
+    std::cerr << usage << std::endl;
+    std::exit(-1);
+  }
+
+  return camera_intrinsics;
+}
 
 struct Checked {
   cv::Ptr<rgbd::Odometry> odometry;
+  cv::Mat camera_intrinsics;
   fs::path associations_file_path;
 };
 
@@ -20,7 +58,7 @@ struct Checked {
 Checked check_arguments(int argc, char **argv) {
 
   // Check that the number of arguments is correct.
-  if (argc != 3) {
+  if (argc != 4) {
     std::cerr << usage << std::endl;
     std::exit(-1);
   }
@@ -36,14 +74,17 @@ Checked check_arguments(int argc, char **argv) {
     std::exit(-1);
   }
 
+  // Check that the camera id is correct
+  cv::Mat intrinsics = create_camera(argv[2]);
+
   // Check that the associations file exists.
-  const fs::path associations_file = fs::path(argv[2]);
+  const fs::path associations_file = fs::path(argv[3]);
   if (!fs::is_regular_file(associations_file)) {
     std::cerr << associations_file << " is not a valid file." << std::endl;
     std::exit(-1);
   }
 
-  return {odometry, associations_file};
+  return {odometry, intrinsics, associations_file};
 }
 
 struct Assoc {
@@ -135,21 +176,7 @@ int main(int argc, char **argv) {
       extract_associations(checked.associations_file_path);
 
   // Initialize intrinsics camera parameters.
-  cv::Mat camera_intrinsics = cv::Mat::eye(3, 3, CV_32FC1);
-
-  // fr1
-  camera_intrinsics.at<float>(0, 0) = 517.306; // fx
-  camera_intrinsics.at<float>(1, 1) = 516.469; // fy
-  camera_intrinsics.at<float>(0, 2) = 318.643; // cx
-  camera_intrinsics.at<float>(1, 2) = 255.314; // cy
-
-  // icl-nuim
-  // camera_intrinsics.at<float>(0, 0) = 481.20; // fx
-  // camera_intrinsics.at<float>(1, 1) = -480.0; // fy
-  // camera_intrinsics.at<float>(0, 2) = 319.50; // cx
-  // camera_intrinsics.at<float>(1, 2) = 239.50; // cy
-
-  checked.odometry->setCameraMatrix(camera_intrinsics);
+  checked.odometry->setCameraMatrix(checked.camera_intrinsics);
 
   // Declare loop variables.
   cv::Ptr<rgbd::OdometryFrame> src_frame;
