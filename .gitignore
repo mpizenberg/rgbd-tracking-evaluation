@@ -1,3 +1,5 @@
+# Ignore output/ dir
+output
 
 # Created by https://www.gitignore.io/api/vim,osx,c++,linux,python,windows
 # Edit at https://www.gitignore.io/?templates=vim,osx,c++,linux,python,windows
