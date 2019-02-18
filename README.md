@@ -76,8 +76,10 @@ There are basically two ways of cloning this repository:
 
 [so-clone]: https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules
 
-Then, make sure you manage to compile the algorithms you wish to test.
+Then, compile the algorithms you wish to test.
 For this, look at the readme of each of those.
+Make sure that you compile those in Release mode (`cmake -DCMAKE_BUILD_TYPE=Release ..`).
+Otherwise (fovis for example) they might be 10 times slower.
 Now let's say you want to try the fovis algorithm, and managed to compile it already.
 From the root of this repository, enter the following commands:
 
