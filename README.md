@@ -9,7 +9,7 @@ with other state of the art implementations.
 We use datasets following the [TUM RGB-D SLAM dataset][tum-dataset] format.
 For now, this means the TUM dataset itself, containing real sequences,
 and the [ICL-NUIM dataset][icl-nuim], containing synthetic images.
-For more info about the dataset format, read the `doc/dataset-format.md` file.
+For more info about the dataset format, read the `dataset-format.md` file.
 
 [tum-dataset]: https://vision.in.tum.de/data/datasets/rgbd-dataset
 [icl-nuim]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html

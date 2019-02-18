@@ -50,7 +50,7 @@ Those trajectories are stored in files where each line is formatted as follows:
 timestamp tx ty tz qx qy qz qw
 ```
 
-More information about this trajectory file format in the `doc/dataset-format.md` file.
+More information about this trajectory file format in the `dataset-format.md` file.
 Know that an online version of the evaluation scripts are also available
 in the [TUM web site][tum-eval].
 It is restricted, however, to the TUM RGB-D dataset,
