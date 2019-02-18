@@ -1,0 +1,3 @@
+[submodule "third-party/fovis"]
+	path = third-party/fovis
+	url = https://github.com/fovis/fovis.git
