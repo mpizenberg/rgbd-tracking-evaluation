@@ -22,7 +22,7 @@ the color and depth images, and associating them in a merged file,
 where each line matches one color and one depth image in the following manner:
 
 ```
-rgb_timestamp rgb_file_path depth_timestamp depth_file_path
+depth_timestamp depth_file_path rgb_timestamp rgb_file_path
 ```
 
 This is the file that our test scripts want as argument.

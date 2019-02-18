@@ -110,12 +110,14 @@ std::vector<Assoc> extract_associations(fs::path associations_file_path) {
   std::ifstream assoc_file(associations_file_path.string());
 
   // Extract associations at each line of the file.
+  // Associations must follow the format:
+  // depth_timestamp depth_file_path rgb_timestamp rgb_file_path
   for (std::string line; std::getline(assoc_file, line);) {
     std::istringstream iss(line);
     double rgb_timestamp, depth_timestamp;
     fs::path rgb_file_path, depth_file_path;
-    if (iss >> rgb_timestamp >> rgb_file_path >> depth_timestamp >>
-        depth_file_path) {
+    if (iss >> depth_timestamp >> depth_file_path >> rgb_timestamp >>
+        rgb_file_path) {
       Assoc assoc = {rgb_timestamp, dataset_dir / rgb_file_path,
                      depth_timestamp, dataset_dir / depth_file_path};
       associations.push_back(assoc);
@@ -137,7 +139,8 @@ std::vector<uint8_t> gray_img_from_file(std::string rgb_file) {
 
 // Retrieve depth map from file.
 std::vector<float> depth_map_from_file(std::string depth_file) {
-  cv::Mat depth_u16 = cv::imread(depth_file, -1);
+  cv::Mat depth_u16 = cv::imread(depth_file, cv::IMREAD_ANYDEPTH);
+  assert(depth_u16.type() == CV_16UC1);
   cv::Mat depth;
   depth_u16.convertTo(depth, CV_32FC1, 1.f / 5000.f);
   std::vector<float> vec_float;
