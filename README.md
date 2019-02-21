@@ -35,7 +35,8 @@ The open-source algorithms available for testing here are:
 - Dense Visual Odometry ([DVO][dvo]), based on the paper
   "Robust Odometry Estimation for RGB-D Cameras", C. Kerl, J. Sturm and D. Cremers,
   In International Conference on Robotics and Automation (ICRA), 2013.
-  TODO: strip ROS requirements of DVO.
+- TODO Daniel G. G., RAS, 2015 : http://webdiis.unizar.es/~danielgg/code.html
+- TODO? Alejo Concha, 2017 RGBDTAM : https://github.com/alejocb/rgbdtam
 
 [ocv-odometry]: https://docs.opencv.org/4.0.1/df/ddc/classcv_1_1rgbd_1_1Odometry.html
 [ocv-rgbd]: https://docs.opencv.org/4.0.1/d0/d60/classcv_1_1rgbd_1_1RgbdOdometry.html

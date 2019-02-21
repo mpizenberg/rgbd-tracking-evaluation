@@ -21,3 +21,10 @@ include_directories( third-party/fovis/build/include )
 link_directories( third-party/fovis/build/lib )
 add_executable( fovis_track src/fovis_track.cpp )
 target_link_libraries( fovis_track ${OpenCV_LIBS} ${Boost_FILESYSTEM_LIBRARY} fovis Eigen3::Eigen )
+
+# DVO implementation
+find_package(Eigen3 3.3 REQUIRED)
+include_directories( third-party/dvo/include )
+link_directories( third-party/dvo/build )
+add_executable( dvo_track src/dvo_track.cpp )
+target_link_libraries( dvo_track ${OpenCV_LIBS} ${Boost_FILESYSTEM_LIBRARY} dvo_core Eigen3::Eigen )
