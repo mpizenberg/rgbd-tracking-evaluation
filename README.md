@@ -145,3 +145,39 @@ This repository directly depends on code with different licenses:
 - Fovis is under GPL-2.0 or later
 
 As a consequence, the code in this repository is distributed under GPL-3.0 or later.
+
+## FAQ
+
+### When compiling, I got "fovis/fovis.hpp not found"?
+
+There might be two reasons for this to appear.
+
+1. You might not have compiled fovis first.
+   Indeed compiling the test programs in `src/` requires that you already
+   compiled the corresponding algorithms to produce their shared libraries.
+2. You have compiled fovis not as a submodule,
+   and forgot to change the `include_directories(...)`
+   and `link_idrectories(...)` commands in the `CMakeLists.txt`.
+
+### When running the test programs, no file is created?
+
+This is the normal behavior.
+Those programs, and the python scripts in tooling,
+all print their results in stdout (the console).
+To retrieve them in a file, do as you would for any other command,
+by redirecting the results in a file of your choosing:
+
+```sh
+some_track_program arguments > some_file.txt
+```
+
+### When running the tool scripts I get errors like "print ... SyntaxError: invalid syntax"?
+
+Or "dict has no attribute remove", etc.
+Those scripts provided by the TUM RGB-D dataset are written in python 2.
+So if your main python version is python 3, they will crash.
+If you don't have a python module required they will also crash.
+
+I suggest that you use a virtual environment manager,
+such as [Conda][conda], to isolate a python 2 environment with the exact
+dependencies you need for those scripts to run.
