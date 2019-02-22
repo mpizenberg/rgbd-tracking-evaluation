@@ -125,6 +125,7 @@ $> make
 $> ./dvo_track fr1 $DATASET/associations.txt > $DATASET/trajectory-dvo.txt
 
 # Run evaluations scripts (ATE with plot, and RPE without)
+$> cd ../tooling
 $> python evaluate_ate.py --verbose --plot $DATASET/traj-dvo.png $DATASET/groundtruth.txt $DATASET/trajectory-dvo.txt
 $> python evaluate_rpe.py --verbose --fixed_delta --delta_unit s --delta 1 $DATASET/groundtruth.txt $DATASET/trajectory-dvo.txt
 ```
