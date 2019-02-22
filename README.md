@@ -47,7 +47,7 @@ The open-source algorithms available for testing here are:
 
 ## Requirements
 
-Each algorithm have a different set of requirements.
+Each algorithm has a different set of requirements.
 These have been tested under the Arch linux distribution,
 kernel 4.19.17-1-lts or more recent.
 To make everything compile, it required:
@@ -80,35 +80,55 @@ There are basically two ways of cloning this repository:
 Then, compile the algorithms you wish to test.
 For this, look at the readme of each of those.
 Make sure that you compile those in Release mode (`cmake -DCMAKE_BUILD_TYPE=Release ..`).
-Otherwise (fovis for example) they might be 10 times slower.
-Now let's say you want to try the fovis algorithm, and managed to compile it already.
-From the root of this repository, enter the following commands:
+Otherwise they might be more than 10 times slower.
+
+Let's say, for example, that we want to test the DVO algorithm,
+and that we cloned the repository with its submodules (DVO is in third-party/dvo/).
+We will proceed as follows.
 
 ```sh
-# Create a build/ directory for build artifacts
+# Download a compatible dataset, such as one at:
+# https://vision.in.tum.de/data/datasets/rgbd-dataset/download
+# I let you handle that, but starting with "fr1/xyz" is a good idea.
+
+# Generate the associations file
+# More info about it in tooling/README.md
+$> conda activate my-python2-scientific-virtual-env
+$> cd tooling/
+$> DATASET=absolute/path/to/fr1/xyz/dataset
+$> python associate.py $DATASET/depth.txt $DATASET/rgb.txt > $DATASET/associations.txt
+
+# Move to DVO directory
+$> cd ../third-party/dvo
+
+# Compile the dvo_core shared library, as explained in DVO's readme
+# You might need to install DVO's dependencies
 $> mkdir build
 $> cd build
-
-# Compile all C++ test executables
 $> cmake ..
 $> make
 
-# Run the fovis tracking algorithm
-$> ./fovis_track path/to/associations/file.txt
+# Go back to this root repository
+$> cd ../../..
+
+# Optionally, comment groups of commands in the CMakeLists.txt
+# that are related to other algorithms than DVO,
+# to minimize the potential dependencies/linking issues.
+
+# Compile test executables
+$> mkdir build
+$> cd build
+$> cmake ..
+$> make
+
+# Run the tracking algorithm on the dataset (e.g. fr1/xyz)
+$> ./dvo_track fr1 $DATASET/associations.txt > $DATASET/trajectory-dvo.txt
+
+# Run evaluations scripts (ATE with plot, and RPE without)
+$> python evaluate_ate.py --verbose --plot $DATASET/traj-dvo.png $DATASET/groundtruth.txt $DATASET/trajectory-dvo.txt
+$> python evaluate_rpe.py --verbose --fixed_delta --delta_unit s --delta 1 $DATASET/groundtruth.txt $DATASET/trajectory-dvo.txt
 ```
 
-Where `path/to/associations/file.txt` is the path to the associations file
-of the TUM-compatible dataset you want to test.
-For more info about this associations file, cf `tooling/README.md`.
-The tracking algorithm will print to stdout (console) the trajectory
-in the TUM format (`timestamp tx ty tz qx qy qz qw`).
-You can redirect the results to a file as you would do with any command:
-
-```sh
-$> ./fovis_track associations.txt > trajectory-fovis.txt
-```
-
-Now we want to evaluate the quality of the tracking.
 Evaluation tooling is provided by the TUM RGB-D dataset.
 These are python scripts, that are gathered here under the `tooling/`
 directory for ease of use.
@@ -118,21 +138,6 @@ Our recomendation would be to manage your environment using [Conda][conda],
 in the Miniconda version, but do as you wish.
 
 [conda]: https://conda.io/projects/conda/en/latest/
-
-So for the evaluation of the trajectory obtained,
-move into the `tooling/` directory and try the absolute trajectory error script:
-
-```sh
-# Switch to your python2 environment with scientific stuff available.
-# Not necessary if you have everything installed globally on your system (you will regret that!).
-$> conda activate my-python2-scientific-environment
-
-# Run the evaluation script
-$> python evaluate_ate.py trajectory-groundtruth.txt trajectory-fovis.txt
-compared_pose_pairs 790 pairs
-absolute_translational_error.rmse 0.046804 m
-...
-```
 
 ## License
 
