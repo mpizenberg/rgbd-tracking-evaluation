@@ -43,7 +43,7 @@ The open-source algorithms available for testing here are:
 [ocv-icp]: https://docs.opencv.org/4.0.1/d7/d83/classcv_1_1rgbd_1_1ICPOdometry.html
 [ocv-rgbd-icp]: https://docs.opencv.org/4.0.1/d2/d0f/classcv_1_1rgbd_1_1RgbdICPOdometry.html
 [fovis]: https://github.com/fovis/fovis
-[dvo]: https://github.com/tum-vision/dvo
+[dvo]: https://github.com/mpizenberg/dvo
 
 ## Requirements
 
