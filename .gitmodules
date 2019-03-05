@@ -4,3 +4,6 @@
 [submodule "third-party/dvo"]
 	path = third-party/dvo
 	url = https://github.com/mpizenberg/dvo.git
+[submodule "third-party/visual-odometry-rs"]
+	path = third-party/visual-odometry-rs
+	url = https://github.com/mpizenberg/visual-odometry-rs.git
