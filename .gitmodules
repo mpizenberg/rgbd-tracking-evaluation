@@ -3,4 +3,4 @@
 	url = https://github.com/fovis/fovis.git
 [submodule "third-party/dvo"]
 	path = third-party/dvo
-	url = git@github.com:mpizenberg/dvo.git
+	url = https://github.com/mpizenberg/dvo.git
