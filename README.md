@@ -35,7 +35,8 @@ The open-source algorithms available for testing here are:
 - Dense Visual Odometry ([DVO][dvo]), based on the paper
   "Robust Odometry Estimation for RGB-D Cameras", C. Kerl, J. Sturm and D. Cremers,
   In International Conference on Robotics and Automation (ICRA), 2013.
-- TODO Daniel G. G., RAS, 2015 : http://webdiis.unizar.es/~danielgg/code.html
+- Visual Odometry in Rust ([vors][vors]), currently being worked on.
+- TODO? Daniel G. G., RAS, 2015 : http://webdiis.unizar.es/~danielgg/code.html
 - TODO? Alejo Concha, 2017 RGBDTAM : https://github.com/alejocb/rgbdtam
 
 [ocv-odometry]: https://docs.opencv.org/4.0.1/df/ddc/classcv_1_1rgbd_1_1Odometry.html
@@ -44,6 +45,7 @@ The open-source algorithms available for testing here are:
 [ocv-rgbd-icp]: https://docs.opencv.org/4.0.1/d2/d0f/classcv_1_1rgbd_1_1RgbdICPOdometry.html
 [fovis]: https://github.com/fovis/fovis
 [dvo]: https://github.com/mpizenberg/dvo
+[vors]: https://github.com/mpizenberg/visual-odometry-rs
 
 ## Requirements
 
@@ -56,6 +58,7 @@ To make everything compile, it required:
 - [Ceres Solver][ceres-solver]. Tested with version 1.14.0.
 - [Eigen3][eigen3]. Tested with version 3.3.7.
 - [Boost][boost]. Tested with version 1.69.0.
+- [Rust][rust]. Tested with version 1.33.0.
 - Indirect dependencies coming from those above.
 - Maybe something else I had already installed.
 
@@ -67,6 +70,7 @@ And if you are not on Ubuntu, chances are you can manage ;)
 [ceres-solver]: http://ceres-solver.org/
 [eigen3]: http://eigen.tuxfamily.org/index.php?title=Main_Page
 [boost]: https://www.boost.org/
+[rust]: https://www.rust-lang.org/
 
 ## Getting Started
 
@@ -153,6 +157,7 @@ This repository directly depends on code with different licenses:
 - Boost is under the Boost license
 - DVO is under GPL-3.0 or later
 - Fovis is under GPL-2.0 or later
+- The rust dependencies are under a mix of permissive licenses.
 
 As a consequence, the code in this repository is distributed under GPL-3.0 or later.
 
