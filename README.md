@@ -59,6 +59,10 @@ To make everything compile, it required:
 - Indirect dependencies coming from those above.
 - Maybe something else I had already installed.
 
+If you are running on Ubuntu, you can find exact dependencies required
+from a fresh Ubuntu install by looking at the docker files in the `dockerfiles/` directory.
+And if you are not on Ubuntu, chances are you can manage ;)
+
 [open-cv]: https://opencv.org/
 [ceres-solver]: http://ceres-solver.org/
 [eigen3]: http://eigen.tuxfamily.org/index.php?title=Main_Page
@@ -122,7 +126,7 @@ $> cmake ..
 $> make
 
 # Run the tracking algorithm on the dataset (e.g. fr1/xyz)
-$> ./dvo_track fr1 $DATASET/associations.txt > $DATASET/trajectory-dvo.txt
+$> bin/dvo_track fr1 $DATASET/associations.txt > $DATASET/trajectory-dvo.txt
 
 # Run evaluations scripts (ATE with plot, and RPE without)
 $> cd ../tooling
