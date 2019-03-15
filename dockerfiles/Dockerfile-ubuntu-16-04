@@ -1,0 +1,64 @@
+# Use bare ubuntu 16.04 (xenial)
+FROM ubuntu:xenial
+
+# Set working directory /rgbd_track_eval
+WORKDIR /rgbd_track_eval
+
+# Install dependencies
+RUN apt update && apt upgrade -y && DEBIAN_FRONTEND=noninteractive apt install -y \
+  build-essential cmake pkg-config \
+  zlib1g-dev git curl unzip \
+  libboost-dev libboost-filesystem-dev libboost-system-dev \
+  libtbb-dev
+
+# Install Eigen 3.3.7
+ENV commit 323c052e1731
+RUN curl -L https://bitbucket.org/eigen/eigen/get/${commit}.zip --output eigen3.zip \
+  && unzip eigen3.zip \
+  && rm eigen3.zip \
+  && cd eigen-eigen-${commit} \
+  && mkdir build && cd build \
+  && cmake .. && make -j2 && make install \
+  && cd ../../ && rm -rf eigen-eigen-${commit}
+
+# Install Sophus
+ENV commit 26c200265e2eb3d76e5ab00a99ada686d6a80d15
+RUN curl -L https://github.com/strasdat/Sophus/archive/${commit}.zip --output sophus.zip \
+  && unzip sophus.zip \
+  && rm sophus.zip \
+  && cd Sophus-${commit} \
+  && mkdir build && cd build \
+  && cmake .. && make -j2 && make install \
+  && cd ../../ && rm -rf Sophus-${commit}
+
+# Install OpenCV 4.0.1 with OpenCV Contrib
+ENV version 4.0.1
+RUN curl -L https://github.com/opencv/opencv/archive/${version}.zip --output opencv.zip \
+  && curl -L https://github.com/opencv/opencv_contrib/archive/${version}.zip --output opencv_contrib.zip \
+  && unzip opencv.zip \
+  && unzip opencv_contrib.zip \
+  && rm opencv.zip \
+  && rm opencv_contrib.zip \
+  && cd opencv-${version} \
+  && mkdir build && cd build \
+  && cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${version}/modules .. \
+  && make -j2 && make install \
+  && cd ../../ && rm -rf opencv-${version}
+
+RUN rm -rf opencv_contrib-${version}
+
+# Install a Python virtual env manager (conda)
+RUN curl -L https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh --output miniconda.sh \
+  && chmod +x miniconda.sh \
+  && ./miniconda.sh -b -p /opt/conda \
+  && rm miniconda.sh \
+  && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+  && echo "source /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+
+RUN /opt/conda/bin/conda create -n my-python2-scientific-virtual-env numpy python=2.7 -y \
+  && echo "conda activate my-python2-scientific-virtual-env" >> ~/.bashrc
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
+  && echo "source ~/.cargo/env" >> ~/.bashrc
+
