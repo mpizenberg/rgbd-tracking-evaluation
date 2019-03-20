@@ -1,4 +1,5 @@
 use nalgebra::UnitQuaternion;
+use std::collections::HashMap;
 use std::fmt::{self, Debug};
 use std::{env, error::Error, fs, io::BufReader, io::Read, path::Path, process::exit};
 use visual_odometry_rs::dataset::tum_rgbd::{self, Frame};
@@ -15,25 +16,38 @@ fn main() {
 const USAGE: &str = "Usage: cargo run --release --bin eval_rpe traj_gt traj_est";
 
 fn run(args: Vec<String>) -> Result<(), Box<Error>> {
-    // Check that the arguments are correct.
-    let trajectory_gt_file = args.get(1).ok_or("Wrong number of arguments")?;
-    let trajectory_est_file = args.get(2).ok_or("Wrong number of arguments")?;
+    // Retrieve all trajectories passed as arguments.
+    let trajectories = args.iter().skip(1).map(|f| (f, parse_trajectory(f)));
 
-    // Build a vector of frames, containing timestamps and camera poses.
-    let trajectory_gt = parse_trajectory(trajectory_gt_file)?;
-    let trajectory_est = parse_trajectory(trajectory_est_file)?;
-    // eprintln!("Number of ground truth frames: {}", trajectory_gt.len());
-    // eprintln!("Number of estimated frames:    {}", trajectory_est.len());
+    // Put each trajectory either in the ground truth or estimation hash maps.
+    let mut ground_truth_trajectories = HashMap::with_capacity(args.len());
+    let mut estimated_trajectories = HashMap::with_capacity(args.len());
+    for (file_path, potential_trajectory) in trajectories {
+        let traj = potential_trajectory?;
+        let traj_metadata = metadata(file_path);
+        eprintln!("{:?}", &traj_metadata);
+        match &traj_metadata.algorithm {
+            None => ground_truth_trajectories.insert(file_path, (traj_metadata, traj)),
+            Some(_) => estimated_trajectories.insert(file_path, (traj_metadata, traj)),
+        };
+    }
 
-    // Compute relative pose error at 1 frame and 1 second.
-    let rpe = relative_pose_error(&trajectory_gt, &trajectory_est);
-    // eprintln!("{:?}", rpe);
-
-    let traj_metadata = metadata(trajectory_gt_file);
+    // // Build a vector of frames, containing timestamps and camera poses.
+    // let trajectory_gt = parse_trajectory(trajectory_gt_file)?;
+    // let trajectory_est = parse_trajectory(trajectory_est_file)?;
+    // // eprintln!("Number of ground truth frames: {}", trajectory_gt.len());
+    // // eprintln!("Number of estimated frames:    {}", trajectory_est.len());
+    //
+    // // Compute relative pose error at 1 frame and 1 second.
+    // let rpe = relative_pose_error(&trajectory_gt, &trajectory_est);
+    // // eprintln!("{:?}", rpe);
+    //
+    // let traj_metadata = metadata(trajectory_gt_file);
 
     Ok(())
 }
 
+#[derive(Debug)]
 struct Metadata {
     sequence: String,
     camera: String,
