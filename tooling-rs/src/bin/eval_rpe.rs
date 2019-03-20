@@ -29,15 +29,7 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
     let rpe = relative_pose_error(&trajectory_gt, &trajectory_est);
     // eprintln!("{:?}", rpe);
 
-    let algorithms = vec![
-        "dvo",
-        "fovis",
-        "ocv-rgbd",
-        "ocv-icp",
-        "ocv-rgbd-icp",
-        "vors",
-    ];
-    let traj_metadata = metadata(trajectory_gt_file, algorithms);
+    let traj_metadata = metadata(trajectory_gt_file);
 
     Ok(())
 }
@@ -48,7 +40,15 @@ struct Metadata {
     algorithm: Option<String>,
 }
 
-fn metadata<P: AsRef<Path>>(path: P, algorithms: Vec<&str>) -> Metadata {
+fn metadata<P: AsRef<Path>>(path: P) -> Metadata {
+    let algorithms = vec![
+        "dvo",
+        "fovis",
+        "ocv-rgbd",
+        "ocv-icp",
+        "ocv-rgbd-icp",
+        "vors",
+    ];
     let stem = &path.as_ref().file_stem().unwrap().to_string_lossy();
     let algo = algorithms.iter().find(|&a| stem.ends_with(a));
     let sequence = match algo {
