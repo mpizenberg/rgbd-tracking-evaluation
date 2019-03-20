@@ -32,7 +32,7 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
     let matches = match_gt_est(&trajectory_gt, &trajectory_est, threshold_gt);
 
     // Compute relative pose error at one frame distance.
-    let (translation_errors, rotation_errors) = rpe_1_frame(matches);
+    let (translation_errors, rotation_errors) = rpe_1_frame(&matches);
     let (trans_error_rmse, trans_error_median) = statistics(&translation_errors);
     let (rot_error_rmse, rot_error_median) = statistics(&rotation_errors);
     eprintln!("Translation error - rmse:   {} m", trans_error_rmse);
@@ -45,8 +45,47 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
     eprintln!("Threshold est: {}", threshold_est);
 
     // Compute relative pose error at 1 second later.
+    let (translation_errors_1s, rotation_errors_1s) = rpe_1_second(&matches, threshold_est);
+    let (trans_error_rmse_1s, trans_error_median_1s) = statistics(&translation_errors_1s);
+    let (rot_error_rmse_1s, rot_error_median_1s) = statistics(&rotation_errors_1s);
+    eprintln!("Translation error (1s) - rmse:   {} m", trans_error_rmse_1s);
+    eprintln!(
+        "Translation error (1s) - median: {} m",
+        trans_error_median_1s
+    );
+    eprintln!(
+        "Rotation error (1s) - rmse:   {} deg",
+        degrees(rot_error_rmse_1s)
+    );
+    eprintln!(
+        "Rotation error (1s) - median: {} deg",
+        degrees(rot_error_median_1s)
+    );
 
     Ok(())
+}
+
+fn rpe_1_second(matches: &Vec<(&Frame, &Frame)>, threshold: f64) -> (Vec<f32>, Vec<f32>) {
+    let mut translation_errors = Vec::with_capacity(matches.len());
+    let mut rotation_errors = Vec::with_capacity(matches.len());
+    let mut start_search = 0;
+    for (frame_gt, frame_est) in matches.iter() {
+        let target = frame_gt.timestamp + 1.0; // 1 second later.
+        match find_nearest_right(target, matches, |m| m.1.timestamp, start_search) {
+            None => break,
+            Some(((later_frame_gt, later_frame_est), index)) => {
+                start_search = index;
+                if (target - later_frame_est.timestamp).abs() < threshold {
+                    let motion_gt = later_frame_gt.pose.inverse() * frame_gt.pose;
+                    let motion_est = later_frame_est.pose.inverse() * frame_est.pose;
+                    let motion_error = motion_gt.inverse() * motion_est;
+                    translation_errors.push(motion_error.translation.vector.norm());
+                    rotation_errors.push(angle(motion_error.rotation));
+                }
+            }
+        }
+    }
+    (translation_errors, rotation_errors)
 }
 
 fn degrees(radians: f32) -> f32 {
@@ -60,7 +99,7 @@ fn statistics(data: &Vec<f32>) -> (f32, f32) {
     (rmse, fast_median(data.clone()))
 }
 
-fn rpe_1_frame(matches: Vec<(&Frame, &Frame)>) -> (Vec<f32>, Vec<f32>) {
+fn rpe_1_frame(matches: &Vec<(&Frame, &Frame)>) -> (Vec<f32>, Vec<f32>) {
     let mut translation_errors = Vec::with_capacity(matches.len() - 1);
     let mut rotation_errors = Vec::with_capacity(matches.len() - 1);
     for (new, old) in matches.iter().skip(1).zip(matches.iter()) {
