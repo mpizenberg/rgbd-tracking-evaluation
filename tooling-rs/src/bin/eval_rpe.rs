@@ -25,11 +25,20 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
     for (file_path, potential_trajectory) in trajectories {
         let traj = potential_trajectory?;
         let traj_metadata = metadata(file_path);
-        eprintln!("{:?}", &traj_metadata);
         match &traj_metadata.algorithm {
             None => ground_truth_trajectories.insert(file_path, (traj_metadata, traj)),
             Some(_) => estimated_trajectories.insert(file_path, (traj_metadata, traj)),
         };
+    }
+
+    // For each ground truth, evaluate associated estimated trajectories.
+    for (meta_gt, traj_gt) in ground_truth_trajectories.values() {
+        let estimated_same_seq = estimated_trajectories
+            .values()
+            .filter(|(meta, _)| meta.sequence == meta_gt.sequence);
+        for (meta, traj) in estimated_same_seq {
+            let traj_rpe = relative_pose_error(traj_gt, traj);
+        }
     }
 
     // // Build a vector of frames, containing timestamps and camera poses.
@@ -58,10 +67,10 @@ fn metadata<P: AsRef<Path>>(path: P) -> Metadata {
     let algorithms = vec![
         "dvo",
         "fovis",
+        "vors",
         "ocv-rgbd",
         "ocv-icp",
         "ocv-rgbd-icp",
-        "vors",
     ];
     let stem = &path.as_ref().file_stem().unwrap().to_string_lossy();
     let algo = algorithms.iter().find(|&a| stem.ends_with(a));
