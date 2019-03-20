@@ -31,6 +31,9 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
         };
     }
 
+    // Start CSV header
+    println!("{}", csv_header());
+
     // For each ground truth, evaluate associated estimated trajectories.
     for (meta_gt, traj_gt) in ground_truth_trajectories.values() {
         let estimated_same_seq = estimated_trajectories
@@ -38,22 +41,28 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
             .filter(|(meta, _)| meta.sequence == meta_gt.sequence);
         for (meta, traj) in estimated_same_seq {
             let traj_rpe = relative_pose_error(traj_gt, traj);
+            println!("{},{}", meta.csv_line(), traj_rpe.csv_line());
         }
     }
 
-    // // Build a vector of frames, containing timestamps and camera poses.
-    // let trajectory_gt = parse_trajectory(trajectory_gt_file)?;
-    // let trajectory_est = parse_trajectory(trajectory_est_file)?;
-    // // eprintln!("Number of ground truth frames: {}", trajectory_gt.len());
-    // // eprintln!("Number of estimated frames:    {}", trajectory_est.len());
-    //
-    // // Compute relative pose error at 1 frame and 1 second.
-    // let rpe = relative_pose_error(&trajectory_gt, &trajectory_est);
-    // // eprintln!("{:?}", rpe);
-    //
-    // let traj_metadata = metadata(trajectory_gt_file);
-
     Ok(())
+}
+
+fn csv_header() -> String {
+    [
+        "sequence",
+        "camera",
+        "algo",
+        "t_err_rmse_f",
+        "t_err_median_f",
+        "r_err_rmse_f",
+        "r_err_median_f",
+        "t_err_rmse_s",
+        "t_err_median_s",
+        "r_err_rmse_s",
+        "r_err_median_s",
+    ]
+    .join(",")
 }
 
 #[derive(Debug)]
@@ -61,6 +70,17 @@ struct Metadata {
     sequence: String,
     camera: String,
     algorithm: Option<String>,
+}
+
+impl Metadata {
+    fn csv_line(&self) -> String {
+        [
+            self.sequence.clone(),
+            self.camera.clone(),
+            self.algorithm.clone().expect("should not happen ..."),
+        ]
+        .join(",")
+    }
 }
 
 fn metadata<P: AsRef<Path>>(path: P) -> Metadata {
@@ -141,6 +161,22 @@ struct Rpe {
     translation_error_median_1s: f32,
     rotation_error_rmse_1s: f32,
     rotation_error_median_1s: f32,
+}
+
+impl Rpe {
+    fn csv_line(&self) -> String {
+        [
+            self.translation_error_rmse_1f.to_string(),
+            self.translation_error_median_1f.to_string(),
+            self.rotation_error_rmse_1f.to_string(),
+            self.rotation_error_median_1f.to_string(),
+            self.translation_error_rmse_1s.to_string(),
+            self.translation_error_median_1s.to_string(),
+            self.rotation_error_rmse_1s.to_string(),
+            self.rotation_error_median_1s.to_string(),
+        ]
+        .join(",")
+    }
 }
 
 impl Debug for Rpe {
