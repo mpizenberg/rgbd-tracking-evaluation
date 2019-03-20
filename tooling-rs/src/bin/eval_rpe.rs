@@ -1,4 +1,5 @@
 use nalgebra::UnitQuaternion;
+use std::fmt::{self, Debug};
 use std::{env, error::Error, fs, io::BufReader, io::Read, path::Path, process::exit};
 use visual_odometry_rs::dataset::tum_rgbd::{self, Frame};
 
@@ -21,48 +22,148 @@ fn run(args: Vec<String>) -> Result<(), Box<Error>> {
     // Build a vector of frames, containing timestamps and camera poses.
     let trajectory_gt = parse_trajectory(trajectory_gt_file)?;
     let trajectory_est = parse_trajectory(trajectory_est_file)?;
-    eprintln!("Number of ground truth frames: {}", trajectory_gt.len());
-    eprintln!("Number of estimated frames:    {}", trajectory_est.len());
+    // eprintln!("Number of ground truth frames: {}", trajectory_gt.len());
+    // eprintln!("Number of estimated frames:    {}", trajectory_est.len());
 
+    // Compute relative pose error at 1 frame and 1 second.
+    let rpe = relative_pose_error(&trajectory_gt, &trajectory_est);
+    // eprintln!("{:?}", rpe);
+
+    let algorithms = vec![
+        "dvo",
+        "fovis",
+        "ocv-rgbd",
+        "ocv-icp",
+        "ocv-rgbd-icp",
+        "vors",
+    ];
+    let traj_metadata = metadata(trajectory_gt_file, algorithms);
+
+    Ok(())
+}
+
+struct Metadata {
+    sequence: String,
+    camera: String,
+    algorithm: Option<String>,
+}
+
+fn metadata<P: AsRef<Path>>(path: P, algorithms: Vec<&str>) -> Metadata {
+    let stem = &path.as_ref().file_stem().unwrap().to_string_lossy();
+    let algo = algorithms.iter().find(|&a| stem.ends_with(a));
+    let sequence = match algo {
+        None => stem,
+        Some(algo_name) => &stem[0..(stem.len() - algo_name.len() - 1)],
+    };
+    let camera = if sequence.contains("freiburg1") {
+        "fr1"
+    } else if sequence.contains("freiburg2") {
+        "fr2"
+    } else if sequence.contains("freiburg3") {
+        "fr3"
+    } else if sequence.contains("frei_png") {
+        "icl"
+    } else {
+        "unknown"
+    };
+    Metadata {
+        sequence: sequence.to_string(),
+        camera: camera.to_string(),
+        algorithm: algo.map(|a| a.to_string()),
+    }
+}
+
+fn relative_pose_error(trajectory_gt: &Vec<Frame>, trajectory_est: &Vec<Frame>) -> Rpe {
     // Define a matching time distance threshold between estimated and ground truth frames.
-    let threshold_gt = timestamps_threshold(&trajectory_gt);
-    eprintln!("Threshold gt: {}", threshold_gt);
+    let threshold_gt = timestamps_threshold(trajectory_gt);
 
     // Match ground truth frames with estimated ones.
-    let matches = match_gt_est(&trajectory_gt, &trajectory_est, threshold_gt);
+    let matches = match_gt_est(trajectory_gt, trajectory_est, threshold_gt);
 
     // Compute relative pose error at one frame distance.
     let (translation_errors, rotation_errors) = rpe_1_frame(&matches);
     let (trans_error_rmse, trans_error_median) = statistics(&translation_errors);
     let (rot_error_rmse, rot_error_median) = statistics(&rotation_errors);
-    eprintln!("Translation error - rmse:   {} m", trans_error_rmse);
-    eprintln!("Translation error - median: {} m", trans_error_median);
-    eprintln!("Rotation error - rmse:   {} deg", degrees(rot_error_rmse));
-    eprintln!("Rotation error - median: {} deg", degrees(rot_error_median));
 
     // Define a matching time distance threshold for the later frame (1s later).
-    let threshold_est = timestamps_threshold(&trajectory_est);
-    eprintln!("Threshold est: {}", threshold_est);
+    let threshold_est = timestamps_threshold(trajectory_est);
 
     // Compute relative pose error at 1 second later.
     let (translation_errors_1s, rotation_errors_1s) = rpe_1_second(&matches, threshold_est);
     let (trans_error_rmse_1s, trans_error_median_1s) = statistics(&translation_errors_1s);
     let (rot_error_rmse_1s, rot_error_median_1s) = statistics(&rotation_errors_1s);
-    eprintln!("Translation error (1s) - rmse:   {} m", trans_error_rmse_1s);
-    eprintln!(
-        "Translation error (1s) - median: {} m",
-        trans_error_median_1s
-    );
-    eprintln!(
-        "Rotation error (1s) - rmse:   {} deg",
-        degrees(rot_error_rmse_1s)
-    );
-    eprintln!(
-        "Rotation error (1s) - median: {} deg",
-        degrees(rot_error_median_1s)
-    );
 
-    Ok(())
+    Rpe {
+        // rpe at 1 frame.
+        translation_error_rmse_1f: trans_error_rmse,
+        translation_error_median_1f: trans_error_median,
+        rotation_error_rmse_1f: rot_error_rmse,
+        rotation_error_median_1f: rot_error_median,
+        // rpe at 1 second.
+        translation_error_rmse_1s: trans_error_rmse_1s,
+        translation_error_median_1s: trans_error_median_1s,
+        rotation_error_rmse_1s: rot_error_rmse_1s,
+        rotation_error_median_1s: rot_error_median_1s,
+    }
+}
+
+struct Rpe {
+    // rpe at 1 frame.
+    translation_error_rmse_1f: f32,
+    translation_error_median_1f: f32,
+    rotation_error_rmse_1f: f32,
+    rotation_error_median_1f: f32,
+    // rpe at 1 second.
+    translation_error_rmse_1s: f32,
+    translation_error_median_1s: f32,
+    rotation_error_rmse_1s: f32,
+    rotation_error_median_1s: f32,
+}
+
+impl Debug for Rpe {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Relative pose error:\n")?;
+        write!(
+            f,
+            "  Translation error (1 frame) - rmse:   {} m\n",
+            self.translation_error_rmse_1f
+        )?;
+        write!(
+            f,
+            "  Translation error (1 frame) - median: {} m\n",
+            self.translation_error_median_1f
+        )?;
+        write!(
+            f,
+            "  Rotation error    (1 frame) - rmse: {} deg\n",
+            degrees(self.rotation_error_rmse_1f)
+        )?;
+        write!(
+            f,
+            "  Rotation error    (1 frame) - median: {} deg\n",
+            degrees(self.rotation_error_median_1f)
+        )?;
+        write!(
+            f,
+            "  Translation error (1 second) - rmse:   {} m\n",
+            self.translation_error_rmse_1s
+        )?;
+        write!(
+            f,
+            "  Translation error (1 second) - median: {} m\n",
+            self.translation_error_median_1s
+        )?;
+        write!(
+            f,
+            "  Rotation error    (1 second) - rmse: {} deg\n",
+            degrees(self.rotation_error_rmse_1s)
+        )?;
+        write!(
+            f,
+            "  Rotation error    (1 second) - median: {} deg\n",
+            degrees(self.rotation_error_median_1s)
+        )
+    }
 }
 
 fn rpe_1_second(matches: &Vec<(&Frame, &Frame)>, threshold: f64) -> (Vec<f32>, Vec<f32>) {
