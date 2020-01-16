@@ -15,7 +15,7 @@ fn main() {
 
 const USAGE: &str = "Usage: cargo run --release --bin eval_rpe traj_gt traj_est";
 
-fn run(args: Vec<String>) -> Result<(), Box<Error>> {
+fn run(args: Vec<String>) -> Result<(), Box<dyn Error>> {
     // Retrieve all trajectories passed as arguments.
     let trajectories = args.iter().skip(1).map(|f| (f, parse_trajectory(f)));
 
@@ -347,10 +347,10 @@ fn fast_median<T: PartialOrd + Copy>(mut floats: Vec<T>) -> T {
 }
 
 /// Open a trajectory file and parse it into a vector of Frames.
-fn parse_trajectory<P: AsRef<Path>>(file_path: P) -> Result<Vec<Frame>, Box<Error>> {
+fn parse_trajectory<P: AsRef<Path>>(file_path: P) -> Result<Vec<Frame>, Box<dyn Error>> {
     let file = fs::File::open(file_path)?;
     let mut file_reader = BufReader::new(file);
     let mut content = String::new();
     file_reader.read_to_string(&mut content)?;
-    tum_rgbd::parse::trajectory(content).map_err(|s| s.into())
+    tum_rgbd::parse::trajectory(&content).map_err(|s| s.into())
 }
