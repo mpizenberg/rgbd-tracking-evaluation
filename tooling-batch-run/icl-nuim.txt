@@ -1,0 +1,8 @@
+/data/rgbd-datasets/icl-nuim/living_room_traj0_frei_png
+/data/rgbd-datasets/icl-nuim/living_room_traj1_frei_png
+/data/rgbd-datasets/icl-nuim/living_room_traj2_frei_png
+/data/rgbd-datasets/icl-nuim/living_room_traj3_frei_png
+/data/rgbd-datasets/icl-nuim/traj0_frei_png
+/data/rgbd-datasets/icl-nuim/traj1_frei_png
+/data/rgbd-datasets/icl-nuim/traj2_frei_png
+/data/rgbd-datasets/icl-nuim/traj3_frei_png

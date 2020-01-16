@@ -1,0 +1,9 @@
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_360
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_desk
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_desk2
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_floor
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_plant
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_room
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_rpy
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_teddy
+/data/rgbd-datasets/tum-rgbd/rgbd_dataset_freiburg1_xyz
