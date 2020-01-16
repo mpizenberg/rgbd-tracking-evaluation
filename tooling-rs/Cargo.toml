@@ -5,5 +5,5 @@ authors = ["Matthieu Pizenberg <matthieu.pizenberg@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-visual-odometry-rs = { path = "/home/matthieu/git/phd/slam/visual-odometry-rs"}
+visual-odometry-rs = { path = "/home/matthieu/git/phd/visual-odometry-rs"}
 nalgebra = "0.17"
